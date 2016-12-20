@@ -12,6 +12,20 @@ def clean_zipcode(zipcode)
   zipcode.to_s.rjust(5,"0")[0..4]
 end
 
+def clean_phonenumber(homephone)
+  phonenumber = homephone.to_s.gsub(/\D/,'')
+
+  if phonenumber[0] == '1'
+    phonenumber[0] = ''
+  end
+
+  if phonenumber.length != 10
+    return "bad number"
+  else
+    return phonenumber
+  end
+
+end
 def legislators_by_zipcode(zipcode)
   response = open("https://congress.api.sunlightfoundation.com/legislators/locate?zip=#{zipcode}", "x-api-key" => settings.sunshine_api_key)
   parsed_response=JSON.parse(response.read)
@@ -39,8 +53,12 @@ contents.each do |row|
   id = row[0]
   name = row[:first_name]
   zipcode = clean_zipcode(row[:zipcode])
+
+  phone_number = clean_phonenumber(row[:homephone])
+  puts phone_number
+  
   legislators = legislators_by_zipcode(zipcode)
-  binding.pry
+
 
   form_letter = erb_template.result(binding)
 
